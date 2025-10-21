@@ -304,7 +304,7 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   algorithm_output <- list()
   
   for(R in c(1:length(ids$sample_id))) {
-    print(R)
+    print(ids$sample_id[R])
     algorithm_output[[R]] <- iterative_scores(norm_log_1 = d4_2 %>% filter(sample_id == ids$sample_id[R]), 
                                               all_peptide_fcs_1 = d2 %>% filter(sample_id == ids$sample_id[R]),
                                               max_iterations = set_max_iterations,
@@ -328,6 +328,7 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   
   return(scores)
 }
+
 
 
 
