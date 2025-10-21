@@ -76,6 +76,15 @@ nna <- function(target) {return(!is.na(target))}
 #' @import tidyverse fitdistrplus
 calc_scores <- function(norm_log, all_peptide_fcs, positives, exclusion_method = "genus") {
   print("running ARscore algorithm")
+  all_peptide_fcs <- all_peptide_fcs %>% mutate(fc = (value))
+  
+  if(exclusion_method == "species" | exclusion_method == "group"){
+    all_peptide_fcs <- all_peptide_fcs %>% 
+      filter(taxon_species %nin% positives$taxon_species)
+  } else {
+    all_peptide_fcs <- all_peptide_fcs %>% 
+      filter(taxon_genus %nin% positives$taxon_genus)
+  }
   
   # 1. 获取当前背景肽段的总数量（all_peptide_fcs的行数，即待抽样的总体大小）
   current_bg_size <- nrow(all_peptide_fcs)  # 关键：每轮迭代的背景肽段数量可能不同
@@ -113,16 +122,6 @@ calc_scores <- function(norm_log, all_peptide_fcs, positives, exclusion_method =
     }
   }
   print(representations)
-  all_peptide_fcs <- all_peptide_fcs %>% mutate(fc = (value))
-  
-  
-  if(exclusion_method == "species" | exclusion_method == "group"){
-    all_peptide_fcs <- all_peptide_fcs %>% 
-      filter(taxon_species %nin% positives$taxon_species)
-  } else {
-    all_peptide_fcs <- all_peptide_fcs %>% 
-      filter(taxon_genus %nin% positives$taxon_genus)
-  }
   
   distributions <- data.frame(matrix(nrow = length(representations), ncol = 1000))
   row.names(distributions) <- representations
@@ -349,6 +348,7 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   
   return(scores)
 }
+
 
 
 
