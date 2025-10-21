@@ -77,13 +77,20 @@ nna <- function(target) {return(!is.na(target))}
 calc_scores <- function(norm_log, all_peptide_fcs, positives, exclusion_method = "genus") {
   print("running ARscore algorithm")
   
-  representations <- c(
-    30, 60, 120, 240,
-    480, 960, 1960,
-    3920, 7840
-    #, 2715, 3920, 5431, 7840 not needed for monkey virus, toxome
-    #, 15680 only needed for arboscan
-  )
+  # 1. 提取实际数据中total_peps的最大值
+  max_total_peps <- max(norm_log$total_peps, na.rm = TRUE)
+  
+  # 2. 生成10*2^n序列，直到最大值超过max_total_peps
+  representations <- c()
+  n <- 1  # 起始n值（n≥1）
+  while(TRUE) {
+    current_value <- 10 * (2^n)
+    representations <- c(representations, current_value)
+    if(current_value > max_total_peps) {
+      break
+    }
+    n <- n + 1
+  }
   
   all_peptide_fcs <- all_peptide_fcs %>% mutate(fc = (value))
   
@@ -321,4 +328,5 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   
   return(scores)
 }
+
 
