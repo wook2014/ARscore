@@ -77,19 +77,40 @@ nna <- function(target) {return(!is.na(target))}
 calc_scores <- function(norm_log, all_peptide_fcs, positives, exclusion_method = "genus") {
   print("running ARscore algorithm")
   
-  # 1. 提取实际数据中total_peps的最大值
+  # 1. 获取当前背景肽段的总数量（all_peptide_fcs的行数，即待抽样的总体大小）
+  current_bg_size <- nrow(all_peptide_fcs)  # 关键：每轮迭代的背景肽段数量可能不同
+  
+  # 2. 获取实际数据中total_peps的最大值（需覆盖的目标范围）
   max_total_peps <- max(norm_log$total_peps, na.rm = TRUE)
   
-  # 2. 生成10*2^n序列，直到最大值超过max_total_peps
   representations <- c()
   n <- 1
   while(TRUE) {
-    current_value <- 10 * (2^n)
-    representations <- c(representations, current_value)
-    if(current_value > max_total_peps) {
+    current_value <- 10 * (2^n)  # 生成10*2^n的值
+    
+    # 若当前值超过背景肽段数量，停止（避免抽样时超过总体）
+    if(current_value > current_bg_size) {
       break
     }
+    
+    representations <- c(representations, current_value)
+    
+    # 若当前值已超过max_total_peps，且下一个值会超过背景量，可提前停止
+    next_value <- 10 * (2^(n+1))
+    if(current_value > max_total_peps && next_value > current_bg_size) {
+      break
+    }
+    
     n <- n + 1
+  }
+  if(length(representations) == 0) {
+    # 若背景肽段数量≥10，用10作为保底（最小可能的10*2^1=20不满足时，退到10）
+    if(current_bg_size >= 10) {
+      representations <- 10
+    } else {
+      # 若背景肽段数量<10，直接用当前背景量作为唯一值（允许有放回抽样）
+      representations <- current_bg_size
+    }
   }
   print(representations)
   all_peptide_fcs <- all_peptide_fcs %>% mutate(fc = (value))
@@ -328,6 +349,7 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   
   return(scores)
 }
+
 
 
 
