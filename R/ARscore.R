@@ -82,7 +82,7 @@ calc_scores <- function(norm_log, all_peptide_fcs, positives, exclusion_method =
   
   # 2. 生成10*2^n序列，直到最大值超过max_total_peps
   representations <- c()
-  n <- 1  # 起始n值（n≥1）
+  n <- 1
   while(TRUE) {
     current_value <- 10 * (2^n)
     representations <- c(representations, current_value)
@@ -254,8 +254,8 @@ iterative_scores <- function(norm_log_1, all_peptide_fcs_1, max_iterations = 10,
 #'
 #' @import tidyverse fitdistrplus limma
 ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
-                               set_p_cutoff = -log10(.0001), set_score_cutoff = 2,
-                               required_number_of_peptides = 50,
+                               set_p_cutoff = -log10(0.01), set_score_cutoff = 2,
+                               required_number_of_peptides = 40,
                               exclusion_method = "genus") {
   
   ## peptides that have hits in beads
@@ -328,5 +328,6 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   
   return(scores)
 }
+
 
 
