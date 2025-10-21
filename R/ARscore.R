@@ -91,7 +91,7 @@ calc_scores <- function(norm_log, all_peptide_fcs, positives, exclusion_method =
     }
     n <- n + 1
   }
-  
+  print(representations)
   all_peptide_fcs <- all_peptide_fcs %>% mutate(fc = (value))
   
   
@@ -328,6 +328,7 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   
   return(scores)
 }
+
 
 
 
