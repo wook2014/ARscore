@@ -194,7 +194,7 @@ calc_scores <- function(norm_log, all_peptide_fcs, positives, exclusion_method =
     mutate(p_val = -log10((1-pnorm(abs(zscoreGamma(score_norm, shape = shape, rate = rate)))))) %>%
     mutate(p_val = ifelse(p_val>15, 15, p_val))
   
-  return(norm_log)
+  return(list(error = FALSE, result = norm_log))  # 正常返回结果
 }
 
 
@@ -265,9 +265,7 @@ iterative_scores <- function(norm_log_1, all_peptide_fcs_1, max_iterations = 10,
     iterations <- iterations + 1
   }
   
-  outputs <- list()
-  outputs[[1]] <- scores
-  outputs[[2]] <- positives_output
+  outputs <- list(scores, positives_output)
   return(outputs) 
 }
 
@@ -381,6 +379,7 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   
   return(scores)
 }
+
 
 
 
