@@ -211,8 +211,24 @@ iterative_scores <- function(norm_log_1, all_peptide_fcs_1, max_iterations = 10,
   
   while(iterations < max_iterations) {
     print("iteration " %+% (iterations+1))
-    scores <- calc_scores(norm_log = norm_log_1, all_peptide_fcs = all_peptide_fcs_1, positives = positives_1,
-                          exclusion_method = exclusion_method_1)
+    # 调用calc_scores并检查是否返回错误
+    calc_result <- calc_scores(
+      norm_log = norm_log_1, 
+      all_peptide_fcs = all_peptide_fcs_1, 
+      positives = positives_1,
+      exclusion_method = exclusion_method_1
+    )
+    
+    # 若calc_scores返回错误，退出当前迭代
+    if(calc_result$error) {
+      warning("calc_scores出错：", calc_result$message, "，停止当前样本的迭代")
+      # 可返回截至上一轮的结果（若有）或空结果
+      final_scores <- if(iterations > 0) positives_output[[iterations]] else NULL
+      return(list(final_scores, positives_output))
+    }
+    
+    # 数据正常时，继续迭代逻辑
+    scores <- calc_result$result  # 提取正常结果
     
     #update variables
     positives_2 <- scores %>% filter(p_val == 15) %>% filter(ARscore > 0) #12/02/23 added second internal criteria
@@ -347,6 +363,7 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   
   return(scores)
 }
+
 
 
 
