@@ -152,6 +152,24 @@ calc_scores <- function(norm_log, all_peptide_fcs, positives, exclusion_method =
   
   dist_info <- dist_info %>% mutate(mean = shape / rate) %>%
     mutate(variance = shape / rate^2)
+
+  # 数据检查与清洗
+  dist_info_clean <- dist_info %>%
+    filter(
+      is.finite(total_peps),
+      is.finite(shape),
+      is.finite(rate),
+      is.finite(mean)
+    ) %>% distinct(total_peps, .keep_all = TRUE)
+  
+  # 检查有效数据点数量（至少需要4个不同的x值）
+  x_values <- log10(dist_info_clean$total_peps)
+  valid_x_count <- length(unique(x_values))
+  if(valid_x_count < 4) {
+    warning(paste0("当前迭代数据不足：有效x值仅", valid_x_count, "个（需至少4个），退出该轮迭代"))
+    # 返回包含错误标记的列表，而非norm_log（方便上层函数识别）
+    return(list(error = TRUE, message = "数据点不足，无法拟合样条", data = dist_info_clean))
+  } else { dist_info <- dist_info_clean }
   
   # gamma distribution parameters vary with n
   #shape_lm <- lm(log10(shape) ~ I(log10(total_peps)), data = dist_info)
@@ -363,6 +381,7 @@ ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
   
   return(scores)
 }
+
 
 
 
