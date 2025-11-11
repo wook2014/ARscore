@@ -189,7 +189,7 @@ iterative_scores <- function(norm_log_1, all_peptide_fcs_1, max_iterations = 10,
 }
 
 #####
-ARscore_algorithm <- function(hfc = NULL, fc, set_max_iterations = 10,
+ARscore_algorithm_parallel <- function(hfc = NULL, fc, set_max_iterations = 10,
                               set_p_cutoff = -log10(0.01), set_score_cutoff = 2,
                               required_number_of_peptides = 40,
                               exclusion_method = "genus",
